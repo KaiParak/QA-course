@@ -1,52 +1,61 @@
-package api.tests.restassured;
+    package api.tests.restassured;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+    import io.restassured.RestAssured;
+    import io.restassured.http.ContentType;
+    import org.junit.jupiter.api.BeforeAll;
+    import org.junit.jupiter.api.Test;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
+    import api.util.AuthTokenProvider;
 
-public class PetstoreApiTest {
+    import static io.restassured.RestAssured.given;
+    import static org.hamcrest.Matchers.*;
 
-    @BeforeAll
-    public static void setup() {
-        RestAssured.baseURI = "https://petstore.swagger.io/v2";
-    }
+    public class PetstoreApiTest {
 
-    @Test
-    void testCreatePet() {
-        String requestBody = """
-                {
-                  "id": 987654,
-                  "name": "RestAssuredDoggo",
-                  "photoUrls": [],
-                  "status": "available"
+        @BeforeAll
+        public static void setup() {
+            RestAssured.baseURI = "https://petstore.swagger.io/v2";
+
+            RestAssured.filters((reqSpec, resSpec, ctx) -> {
+                if (AuthTokenProvider.isTokenPresent()) {
+                    reqSpec.header("Authorization", "Bearer " + AuthTokenProvider.getToken());
                 }
-                """;
+                return ctx.next(reqSpec, resSpec);
+            });
+        }
 
-        given()
-                .contentType(ContentType.JSON)
-                .body(requestBody)
-                .when()
-                .post("/pet")
-                .then()
-                .statusCode(200)
-                .body("name", equalTo("RestAssuredDoggo"))
-                .body("status", equalTo("available"));
+        @Test
+        void testCreatePet() {
+            String requestBody = """
+                    {
+                      "id": 987654,
+                      "name": "RestAssuredDoggo",
+                      "photoUrls": [],
+                      "status": "available"
+                    }
+                    """;
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(requestBody)
+                    .when()
+                    .post("/pet")
+                    .then()
+                    .statusCode(200)
+                    .body("name", equalTo("RestAssuredDoggo"))
+                    .body("status", equalTo("available"));
+        }
+
+        @Test
+        void testGetPetById() {
+            long petId = 1;
+
+            given()
+                    .pathParam("petId", petId)
+                    .when()
+                    .get("/pet/{petId}")
+                    .then()
+                    .statusCode(200)
+                    .body("id", equalTo((int) petId));
+        }
     }
-
-    @Test
-    void testGetPetById() {
-        long petId = 1;
-
-        given()
-                .pathParam("petId", petId)
-                .when()
-                .get("/pet/{petId}")
-                .then()
-                .statusCode(200)
-                .body("id", equalTo((int) petId));
-    }
-}

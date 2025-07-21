@@ -1,8 +1,9 @@
-
 package api.tests.junit;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import api.util.AuthTokenProvider;
 
 import java.io.IOException;
 import java.net.URI;
@@ -18,10 +19,16 @@ public class PetstoreApiTest {
     @Test
     void testGetPetById() throws IOException, InterruptedException {
         long petId = 1;
-        HttpRequest request = HttpRequest.newBuilder()
+
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/pet/" + petId))
-                .GET()
-                .build();
+                .GET();
+
+        if (AuthTokenProvider.isTokenPresent()) {
+            requestBuilder.header("Authorization", "Bearer " + AuthTokenProvider.getToken());
+        }
+
+        HttpRequest request = requestBuilder.build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -40,11 +47,16 @@ public class PetstoreApiTest {
                 }
                 """;
 
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/pet"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .build();
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
+
+        if (AuthTokenProvider.isTokenPresent()) {
+            requestBuilder.header("Authorization", "Bearer " + AuthTokenProvider.getToken());
+        }
+
+        HttpRequest request = requestBuilder.build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 

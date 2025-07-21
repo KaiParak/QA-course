@@ -11,11 +11,20 @@ import java.util.Collections;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
+import api.util.AuthTokenProvider;
+
 public class PetstoreDtoTest {
 
     @BeforeAll
     public static void setup() {
         RestAssured.baseURI = "https://petstore.swagger.io/v2";
+
+        RestAssured.filters((reqSpec, resSpec, ctx) -> {
+            if (AuthTokenProvider.isTokenPresent()) {
+                reqSpec.header("Authorization", "Bearer " + AuthTokenProvider.getToken());
+            }
+            return ctx.next(reqSpec, resSpec);
+        });
     }
 
     @Test
