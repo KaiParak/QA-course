@@ -2,7 +2,9 @@ package api.util;
 
 public class AuthTokenProvider {
     public static String getToken() {
-        return System.getProperty("token", "");
+        String token = System.getProperty("token", "");
+        System.out.println("[DEBUG] TOKEN: " + (token.isBlank() ? "NOT SET" : token));
+        return token;
     }
 
     public static boolean isTokenPresent() {

@@ -26,4 +26,6 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+
+    systemProperty("token", System.getProperty("token"))
 }

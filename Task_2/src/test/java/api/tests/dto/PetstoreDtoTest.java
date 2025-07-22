@@ -35,6 +35,8 @@ public class PetstoreDtoTest {
         pet.photoUrls = Collections.singletonList("http://example.com/photo");
         pet.status = "available";
 
+        assert System.getProperty("token").equals("123456");
+
         given()
                 .contentType(ContentType.JSON)
                 .body(pet)
